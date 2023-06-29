@@ -1,24 +1,41 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Header from './components/Header';
+import TransactionList from './components/TransactionList';
+import AddTransaction from './components/AddTransaction';
+import { Provider } from './context';
+import BalanceMoth from './components/BalanceMoth'
+import { useEffect, useState } from 'react';
+import { getTransactionsRequest } from './api/transctions';
+import { TransactionType } from './context/reducer';
+import { initialState } from './utils';
 
-function App() {
+const App = () => {
+  const [initialData, setInitialData] = useState<TransactionType[]>()
+  const [isOnline, setIsOnline] = useState(true)
+  useEffect(() => {
+    const getFakeTransactions = async () => {
+      try {
+        const transaction = await getTransactionsRequest()
+        setInitialData(transaction)
+      } catch (error) {
+        setInitialData(initialState.transactions)
+        setIsOnline(false)
+      }
+    }
+    if (isOnline) {
+      getFakeTransactions()
+    }
+  }, [isOnline])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='d-flex justify-content-center' style={{width: "100%"}}>
+      <Provider initialData={initialData} isOnline={isOnline}>
+        <div className='d-flex flex-column justify-content-center align-items-center' style={{ width: 600, height:"600px", background: "#E3EDFD"}}>
+            <Header />
+            <BalanceMoth />
+            <TransactionList />
+            <AddTransaction />
+        </div>
+      </Provider>
     </div>
   );
 }
